@@ -76,6 +76,12 @@
             <version>0.11.5</version>
             <scope>runtime</scope>
         </dependency>
+        <!--Dependencia para subir imagenes-->
+        <dependency>
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-http44</artifactId>
+            <version>1.39.0</version>
+        </dependency>
 
     </dependencies>
 

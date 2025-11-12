@@ -20,8 +20,11 @@ public class PublicacionMapper {
     }
     public PublicacionDtoResponse toDto (Publicacion publicacion) {
         return PublicacionDtoResponse.builder()
+                .userid(publicacion.getUserid())
+                .usernameAutor(publicacion.getUsername())
                 .contenido(publicacion.getContenido())
                 .fechaPublicacion(publicacion.getFechaPublicacion())
+                .imagenesUrl(publicacion.getImagenesUrl())
                 .comentarios(publicacion.getComentarios() == null ? List.of() :
                         publicacion.getComentarios().stream()
                                 .map(comentarioMapper::toDto)

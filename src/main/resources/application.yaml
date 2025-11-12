@@ -6,3 +6,7 @@ spring:
       uri: ${MONGODBURI}
 server:
   port: 8080
+cloudinary:
+  cloud_name: ${CLOUD_NAME}
+  api_key: ${API_KEY}
+  api_secret: ${API_SECRET}

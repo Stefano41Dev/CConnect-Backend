@@ -4,12 +4,16 @@ import com.stefano.application.services.PublicacionService;
 import com.stefano.web.dto.publicacion.PublicacionDtoRequest;
 import com.stefano.web.dto.publicacion.PublicacionDtoResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/posts")
@@ -17,12 +21,29 @@ import org.springframework.web.bind.annotation.RestController;
 public class PublicacionController {
     private final PublicacionService publicacionService;
 
-    @PostMapping("/generar-publicacion")
+    @PostMapping(value = "/generar-publicacion", consumes = {"multipart/form-data"})
     public ResponseEntity<PublicacionDtoResponse> crearPublicacion(
-            @RequestBody PublicacionDtoRequest publicacionDtoRequest,
+            @RequestPart PublicacionDtoRequest publicacionDtoRequest,
+            @RequestPart List<MultipartFile> multipartFile,
             Authentication authentication
     ){
-        PublicacionDtoResponse dtoResponse = publicacionService.crearPublicacion(publicacionDtoRequest, authentication);
-        return ResponseEntity.ok().body(dtoResponse);
+        PublicacionDtoResponse dtoResponse = publicacionService.crearPublicacion(publicacionDtoRequest, multipartFile, authentication);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dtoResponse);
+    }
+
+    @GetMapping(value = "/listar-publicaciones")
+    public ResponseEntity<Page<PublicacionDtoResponse>> listarPublicaciones(
+            @PageableDefault(size = 10, sort = "fechaPublicacion") Pageable pageable
+    ){
+        Page<PublicacionDtoResponse> publicaciones = publicacionService.listarPublicaciones(pageable);
+        return ResponseEntity.ok().body(publicaciones);
+    }
+    @GetMapping(value = "/listar-publicaciones/{username}")
+    public ResponseEntity<Page<PublicacionDtoResponse>> listarPublicacionesUsuario(
+            @PathVariable String username,
+            @PageableDefault Pageable pageable
+    ){
+        Page<PublicacionDtoResponse> publicaciones = publicacionService.listarPublicacionesUser(username, pageable);
+        return ResponseEntity.ok().body(publicaciones);
     }
 }

@@ -9,8 +9,10 @@ import java.util.List;
 @Builder
 @Data
 public class PublicacionDtoResponse {
+        private String userid;
         private String usernameAutor;
         private String contenido;
         private LocalDateTime fechaPublicacion;
+        private List<String> imagenesUrl;
         private List<ComentarioDtoResponse> comentarios;
 }

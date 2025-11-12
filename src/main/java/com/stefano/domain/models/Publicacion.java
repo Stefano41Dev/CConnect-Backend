@@ -4,8 +4,10 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.web.bind.annotation.BindParam;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "publicacion")
@@ -15,8 +17,11 @@ public class Publicacion {
     @Id
     private String id;
     private String userid;
+    private String username;
     private String contenido;
     private LocalDateTime fechaPublicacion;
-    private List<Comentario> comentarios;
-    private List<String> imagenesUrl;
+    @Builder.Default
+    private List<Comentario> comentarios = new ArrayList<>();
+    @Builder.Default
+    private List<String> imagenesUrl = new ArrayList<>();
 }
