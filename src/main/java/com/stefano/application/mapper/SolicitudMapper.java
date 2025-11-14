@@ -11,7 +11,6 @@ public class SolicitudMapper {
 
     public SolicitudAmistad mandarSolicitudToEntity (MandarSolicitudAmistadDtoRequest request){
         return SolicitudAmistad.builder()
-                .emisorId(request.emisorId())
                 .receptorId(request.receptorId())
                 .estado(EstadoSolicitudAmistad.PENDIENTE)
                 .build();

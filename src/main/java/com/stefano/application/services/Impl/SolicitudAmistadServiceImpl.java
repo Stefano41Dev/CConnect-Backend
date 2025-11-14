@@ -13,7 +13,10 @@ import com.stefano.web.dto.solicitud.MandarSolicitudAmistadDtoRequest;
 import com.stefano.web.dto.solicitud.SolicitudAmistadDtoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -24,8 +27,16 @@ public class SolicitudAmistadServiceImpl implements SolicitudAmistadService {
     private final SolicitudAmistadRepository solicitudAmistadRepository;
     private final SolicitudMapper solicitudMapper;
     @Override
+    @Transactional
     public SolicitudAmistadDtoResponse mandarSolicitudAmistad(MandarSolicitudAmistadDtoRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         SolicitudAmistad solicitudAmistad = solicitudMapper.mandarSolicitudToEntity(request);
+        if(authentication!=null && authentication.getPrincipal() instanceof Usuario usuarioActual){
+            solicitudAmistad.setEmisorId(usuarioActual.getId());
+
+        }else{
+            throw new ErrorNegocio("Usuario no autenticado", HttpStatus.BAD_REQUEST);
+        }
         solicitudAmistad.setFechaEnvio(LocalDateTime.now());
         solicitudAmistad = solicitudAmistadRepository.save(solicitudAmistad);
         return solicitudMapper.toDto(solicitudAmistad);

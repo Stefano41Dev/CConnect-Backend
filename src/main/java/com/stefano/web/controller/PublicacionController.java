@@ -24,10 +24,10 @@ public class PublicacionController {
     @PostMapping(value = "/generar-publicacion", consumes = {"multipart/form-data"})
     public ResponseEntity<PublicacionDtoResponse> crearPublicacion(
             @RequestPart PublicacionDtoRequest publicacionDtoRequest,
-            @RequestPart List<MultipartFile> multipartFile,
-            Authentication authentication
+            @RequestPart List<MultipartFile> multipartFile
+
     ){
-        PublicacionDtoResponse dtoResponse = publicacionService.crearPublicacion(publicacionDtoRequest, multipartFile, authentication);
+        PublicacionDtoResponse dtoResponse = publicacionService.crearPublicacion(publicacionDtoRequest, multipartFile);
         return ResponseEntity.status(HttpStatus.CREATED).body(dtoResponse);
     }
 

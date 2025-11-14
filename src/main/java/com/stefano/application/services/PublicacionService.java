@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface PublicacionService {
-    PublicacionDtoResponse crearPublicacion(PublicacionDtoRequest publicacionDtoRequest, List<MultipartFile> imagenes, Authentication authentications);
+    PublicacionDtoResponse crearPublicacion(PublicacionDtoRequest publicacionDtoRequest, List<MultipartFile> imagenes);
     Page<PublicacionDtoResponse> listarPublicacionesUser(String username, Pageable pageable);
     Page<PublicacionDtoResponse> listarPublicaciones(Pageable pageable);
 

@@ -4,7 +4,6 @@ import lombok.Builder;
 
 @Builder
 public record MandarSolicitudAmistadDtoRequest(
-        String emisorId,
         String receptorId
 ) {
 
