@@ -6,5 +6,4 @@ import lombok.Builder;
 public record MandarSolicitudAmistadDtoRequest(
         String receptorId
 ) {
-
 }

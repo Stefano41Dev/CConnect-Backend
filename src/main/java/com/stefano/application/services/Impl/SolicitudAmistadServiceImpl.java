@@ -12,6 +12,8 @@ import com.stefano.web.dto.solicitud.CambiarEstadoSolicitudDtoRequest;
 import com.stefano.web.dto.solicitud.MandarSolicitudAmistadDtoRequest;
 import com.stefano.web.dto.solicitud.SolicitudAmistadDtoResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class SolicitudAmistadServiceImpl implements SolicitudAmistadService {
     private final UsuarioRepository usuarioRepository;
     private final SolicitudAmistadRepository solicitudAmistadRepository;
     private final SolicitudMapper solicitudMapper;
+
     @Override
     @Transactional
     public SolicitudAmistadDtoResponse mandarSolicitudAmistad(MandarSolicitudAmistadDtoRequest request) {
@@ -43,32 +47,86 @@ public class SolicitudAmistadServiceImpl implements SolicitudAmistadService {
     }
 
     @Override
-    public void cambiarEstadoSolicitudAmistad(CambiarEstadoSolicitudDtoRequest request) {
-        SolicitudAmistad solicitudAmistadBuscada = solicitudAmistadRepository.findById(request.idSolicitudAmistad())
-                .orElseThrow(()->new ErrorNegocio("No se encontro la solicitud", HttpStatus.NOT_FOUND));
+    @Transactional
+    public void aceptarSolicitudAmistad(CambiarEstadoSolicitudDtoRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuarioActual = (Usuario) authentication.getPrincipal();
 
-        EstadoSolicitudAmistad nuevoEstado;
-        try{
-            nuevoEstado =  EstadoSolicitudAmistad.valueOf(request.estadoSolicitud().toUpperCase());
-        }catch(ErrorNegocio ex){
-            throw new ErrorNegocio("El estado enviado no coincide con los estados de la solicitud", HttpStatus.CONFLICT);
-        }
+        SolicitudAmistad solicitudAmistad = solicitudAmistadRepository.findById(request.idSolicitudAmistad())
+                .orElseThrow(()-> new ErrorNegocio("La solicitud de amistad no encontrada", HttpStatus.NOT_FOUND));
 
-
-        if(nuevoEstado.equals(EstadoSolicitudAmistad.ACEPTADO)){
-            if(solicitudAmistadBuscada.getEstado().equals(EstadoSolicitudAmistad.PENDIENTE)){
-                Usuario usuarioEmisor = usuarioRepository.findById(solicitudAmistadBuscada.getEmisorId())
+        if(Objects.equals(usuarioActual.getId(), solicitudAmistad.getReceptorId())){
+            if(solicitudAmistad.getEstado().equals(EstadoSolicitudAmistad.PENDIENTE)){
+                Usuario usuarioEmisor = usuarioRepository.findById(solicitudAmistad.getEmisorId())
                         .orElseThrow(()-> new ErrorNegocio("No se encontro el usuario", HttpStatus.NOT_FOUND));
-                Usuario usuarioReceptor = usuarioRepository.findById(solicitudAmistadBuscada.getReceptorId())
+                Usuario usuarioReceptor = usuarioRepository.findById(solicitudAmistad.getReceptorId())
                         .orElseThrow(()-> new ErrorNegocio("No se encontro el usuario", HttpStatus.NOT_FOUND));
                 usuarioReceptor.getAmigosIds().add(usuarioEmisor.getId());
                 usuarioReceptor.getAmigosIds().add(usuarioReceptor.getId());
+
+                solicitudAmistad.setEstado(EstadoSolicitudAmistad.ACEPTADO);
+                solicitudAmistadRepository.save(solicitudAmistad);
             }else{
                 throw new ErrorNegocio("Solo se puede aceptar solicitudes con el estado pendiente", HttpStatus.CONFLICT);
             }
         }
 
-        solicitudAmistadRepository.deleteById(solicitudAmistadBuscada.getId());
+    }
 
+    @Override
+    @Transactional
+    public void cancelarSolicitudAmistad(CambiarEstadoSolicitudDtoRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuarioActual = (Usuario) authentication.getPrincipal();
+
+        SolicitudAmistad solicitudAmistad = solicitudAmistadRepository.findById(request.idSolicitudAmistad())
+                .orElseThrow(()-> new ErrorNegocio("La solicitud de amistad no encontrada", HttpStatus.NOT_FOUND));
+
+        if(Objects.equals(usuarioActual.getId(), solicitudAmistad.getEmisorId())){
+            solicitudAmistadRepository.deleteById(solicitudAmistad.getId());
+        }else{
+            throw new ErrorNegocio("Solo el usuario emisor puede cancelar una solicitud", HttpStatus.CONFLICT);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void rechazarSolicitudAmistad(CambiarEstadoSolicitudDtoRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuarioActual = (Usuario) authentication.getPrincipal();
+
+        SolicitudAmistad solicitudAmistad = solicitudAmistadRepository.findById(request.idSolicitudAmistad())
+                .orElseThrow(()-> new ErrorNegocio("La solicitud de amistad no encontrada", HttpStatus.NOT_FOUND));
+
+        if(Objects.equals(usuarioActual.getId(), solicitudAmistad.getReceptorId())){
+            solicitudAmistad.setEstado(EstadoSolicitudAmistad.RECHAZADO);
+            solicitudAmistadRepository.save(solicitudAmistad);
+        }else{
+            throw new ErrorNegocio("Solo el usuario receptor puede rechazar una solicitud una solicitud", HttpStatus.CONFLICT);
+        }
+    }
+
+    @Override
+    public Page<SolicitudAmistadDtoResponse> listaSolicitudesAmistadPendientesRecibidas(String userId, Pageable pageable, String estado) {
+        EstadoSolicitudAmistad estadoEnum = convertirEstadoEnum(estado);
+        Page<SolicitudAmistad> solicitudes = solicitudAmistadRepository.findAllByReceptorIdAndEstado(userId,pageable, estadoEnum);
+        return solicitudes.map(solicitudMapper::toDto);
+    }
+
+    @Override
+    public Page<SolicitudAmistadDtoResponse> listaSolicitudesAmistadPendientesEmitidas(String userId, Pageable pageable, String estado) {
+        EstadoSolicitudAmistad estadoEnum = convertirEstadoEnum(estado);
+        Page<SolicitudAmistad> solicitudes = solicitudAmistadRepository.findAllByEmisorIdAndEstado(userId,pageable,estadoEnum);
+        return solicitudes.map(solicitudMapper::toDto);
+    }
+
+    public EstadoSolicitudAmistad convertirEstadoEnum(String estado){
+       EstadoSolicitudAmistad nuevoEstado;
+        try{
+             nuevoEstado = EstadoSolicitudAmistad.valueOf(estado);
+        } catch (IllegalArgumentException e) {
+            throw new ErrorNegocio("El estado de solicitud no coincide", HttpStatus.CONFLICT);
+        }
+        return nuevoEstado;
     }
 }
