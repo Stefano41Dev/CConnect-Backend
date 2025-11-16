@@ -53,25 +53,38 @@ public class SolicitudAmistadServiceImpl implements SolicitudAmistadService {
         Usuario usuarioActual = (Usuario) authentication.getPrincipal();
 
         SolicitudAmistad solicitudAmistad = solicitudAmistadRepository.findById(request.idSolicitudAmistad())
-                .orElseThrow(()-> new ErrorNegocio("La solicitud de amistad no encontrada", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ErrorNegocio("Solicitud de amistad no encontrada", HttpStatus.NOT_FOUND));
 
-        if(Objects.equals(usuarioActual.getId(), solicitudAmistad.getReceptorId())){
-            if(solicitudAmistad.getEstado().equals(EstadoSolicitudAmistad.PENDIENTE)){
-                Usuario usuarioEmisor = usuarioRepository.findById(solicitudAmistad.getEmisorId())
-                        .orElseThrow(()-> new ErrorNegocio("No se encontro el usuario", HttpStatus.NOT_FOUND));
-                Usuario usuarioReceptor = usuarioRepository.findById(solicitudAmistad.getReceptorId())
-                        .orElseThrow(()-> new ErrorNegocio("No se encontro el usuario", HttpStatus.NOT_FOUND));
-                usuarioReceptor.getAmigosIds().add(usuarioEmisor.getId());
-                usuarioReceptor.getAmigosIds().add(usuarioReceptor.getId());
 
-                solicitudAmistad.setEstado(EstadoSolicitudAmistad.ACEPTADO);
-                solicitudAmistadRepository.save(solicitudAmistad);
-            }else{
-                throw new ErrorNegocio("Solo se puede aceptar solicitudes con el estado pendiente", HttpStatus.CONFLICT);
-            }
+        if (!Objects.equals(usuarioActual.getId(), solicitudAmistad.getReceptorId())) {
+            throw new ErrorNegocio("No tienes permiso para aceptar esta solicitud", HttpStatus.FORBIDDEN);
         }
 
+
+        if (!EstadoSolicitudAmistad.PENDIENTE.equals(solicitudAmistad.getEstado())) {
+            throw new ErrorNegocio("Solo se pueden aceptar solicitudes pendientes", HttpStatus.CONFLICT);
+        }
+
+
+        Usuario usuarioEmisor = usuarioRepository.findById(solicitudAmistad.getEmisorId())
+                .orElseThrow(() -> new ErrorNegocio("Usuario emisor no encontrado", HttpStatus.NOT_FOUND));
+
+        Usuario usuarioReceptor = usuarioRepository.findById(solicitudAmistad.getReceptorId())
+                .orElseThrow(() -> new ErrorNegocio("Usuario receptor no encontrado", HttpStatus.NOT_FOUND));
+
+
+        usuarioReceptor.getAmigosIds().add(usuarioEmisor.getId());
+        usuarioEmisor.getAmigosIds().add(usuarioReceptor.getId());
+
+
+        solicitudAmistad.setEstado(EstadoSolicitudAmistad.ACEPTADO);
+
+
+        solicitudAmistadRepository.save(solicitudAmistad);
+        usuarioRepository.save(usuarioReceptor);
+        usuarioRepository.save(usuarioEmisor);
     }
+
 
     @Override
     @Transactional
@@ -82,11 +95,16 @@ public class SolicitudAmistadServiceImpl implements SolicitudAmistadService {
         SolicitudAmistad solicitudAmistad = solicitudAmistadRepository.findById(request.idSolicitudAmistad())
                 .orElseThrow(()-> new ErrorNegocio("La solicitud de amistad no encontrada", HttpStatus.NOT_FOUND));
 
-        if(Objects.equals(usuarioActual.getId(), solicitudAmistad.getEmisorId())){
-            solicitudAmistadRepository.deleteById(solicitudAmistad.getId());
-        }else{
-            throw new ErrorNegocio("Solo el usuario emisor puede cancelar una solicitud", HttpStatus.CONFLICT);
+        if (!Objects.equals(usuarioActual.getId(), solicitudAmistad.getReceptorId())) {
+            throw new ErrorNegocio("No tienes permiso para aceptar esta solicitud", HttpStatus.FORBIDDEN);
         }
+
+
+        if (!EstadoSolicitudAmistad.PENDIENTE.equals(solicitudAmistad.getEstado())) {
+            throw new ErrorNegocio("Solo se pueden cancelar solicitudes pendientes", HttpStatus.CONFLICT);
+        }
+
+        solicitudAmistadRepository.deleteById(solicitudAmistad.getId());
     }
 
     @Override
@@ -98,12 +116,17 @@ public class SolicitudAmistadServiceImpl implements SolicitudAmistadService {
         SolicitudAmistad solicitudAmistad = solicitudAmistadRepository.findById(request.idSolicitudAmistad())
                 .orElseThrow(()-> new ErrorNegocio("La solicitud de amistad no encontrada", HttpStatus.NOT_FOUND));
 
-        if(Objects.equals(usuarioActual.getId(), solicitudAmistad.getReceptorId())){
-            solicitudAmistad.setEstado(EstadoSolicitudAmistad.RECHAZADO);
-            solicitudAmistadRepository.save(solicitudAmistad);
-        }else{
-            throw new ErrorNegocio("Solo el usuario receptor puede rechazar una solicitud una solicitud", HttpStatus.CONFLICT);
+        if (!Objects.equals(usuarioActual.getId(), solicitudAmistad.getReceptorId())) {
+            throw new ErrorNegocio("No tienes permiso para aceptar esta solicitud", HttpStatus.FORBIDDEN);
         }
+
+
+        if (!EstadoSolicitudAmistad.PENDIENTE.equals(solicitudAmistad.getEstado())) {
+            throw new ErrorNegocio("Solo se pueden rechazar solicitudes pendientes", HttpStatus.CONFLICT);
+        }
+        solicitudAmistad.setEstado(EstadoSolicitudAmistad.RECHAZADO);
+        solicitudAmistadRepository.save(solicitudAmistad);
+
     }
 
     @Override
