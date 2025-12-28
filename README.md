@@ -17,13 +17,14 @@ Permite la gestión de usuarios, publicaciones, solicitudes de amistad y autenti
 | POST | `/auth/register` | Registrar usuario |
 | POST | `/auth/login` | Iniciar sesión |
 
-### 📝 Publicaciones
+### Publicaciones
 | Método | Endpoint | Descripción |
 |------|---------|------------|
 | POST | `/posts/-generar-publicacion` | Crear publicación |
 | GET | `/posts/listar-publicaciones` | Listar publicaciones |
 | GET | `/listar-publicaciones/{username}` | Obtener publicación de un usuario|
 
+### Solicitudes de amistad
 | Método | Endpoint                                      | Descripción                             |
 | ------ | --------------------------------------------- | --------------------------------------- |
 | POST   | `/solicitudes/mandar-solicitud`               | Enviar una solicitud de amistad         |
