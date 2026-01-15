@@ -24,6 +24,12 @@ Permite la gestión de usuarios, publicaciones, solicitudes de amistad y autenti
 | GET | `/posts/listar-publicaciones` | Listar publicaciones |
 | GET | `/listar-publicaciones/{username}` | Obtener publicación de un usuario|
 
+### Comentarios
+| Método | Endpoint | Descripción |
+|------|---------|------------|
+| POST | `/comment/agregar` | Crear comentario |
+
+
 ### Solicitudes de amistad
 | Método | Endpoint                                      | Descripción                             |
 | ------ | --------------------------------------------- | --------------------------------------- |
