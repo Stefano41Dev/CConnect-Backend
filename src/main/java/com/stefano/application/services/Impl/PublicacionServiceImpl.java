@@ -4,6 +4,7 @@ import com.stefano.application.exception.ErrorNegocio;
 import com.stefano.application.mapper.PublicacionMapper;
 import com.stefano.application.services.CloudinaryService;
 import com.stefano.application.services.PublicacionService;
+import com.stefano.application.tools.TipoImagenes;
 import com.stefano.domain.models.Publicacion;
 import com.stefano.domain.models.Usuario;
 import com.stefano.domain.repository.PublicacionRepository;
@@ -29,10 +30,12 @@ public class PublicacionServiceImpl implements PublicacionService {
     private final PublicacionMapper publicacionMapper;
     private final PublicacionRepository publicacionRepository;
     private final UsuarioRepository usuarioRepository;
-
     private final CloudinaryService cloudinaryService;
+    private final TipoImagenes tipoImagenes;
+
     @Override
     public PublicacionDtoResponse crearPublicacion(PublicacionDtoRequest publicacionDtoRequest, List<MultipartFile> imagenes) {
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
@@ -43,11 +46,12 @@ public class PublicacionServiceImpl implements PublicacionService {
         publicacion.setUserid(usuario.getId());
         publicacion.setUsername(username);
         publicacion.setFechaPublicacion(LocalDateTime.now());
-        publicacion.setComentarios(List.of());
+        publicacion.setTotalComentarios(0L);
 
-        if(!imagenes.isEmpty()) {
+        if(imagenes != null) {
             for (MultipartFile imagen : imagenes) {
                 try {
+                    tipoImagenes.validarImagen(imagen);
                     String imagenUrl = cloudinaryService.uploadImage(imagen);
                     publicacion.getImagenesUrl().add(imagenUrl);
                 } catch (IOException e) {

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SolicitudMapper {
 
-    public SolicitudAmistad mandarSolicitudToEntity (MandarSolicitudAmistadDtoRequest request){
+    public SolicitudAmistad toEntity (MandarSolicitudAmistadDtoRequest request){
         return SolicitudAmistad.builder()
                 .receptorId(request.receptorId())
                 .estado(EstadoSolicitudAmistad.PENDIENTE)

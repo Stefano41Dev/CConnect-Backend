@@ -9,4 +9,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 public interface SolicitudAmistadRepository extends MongoRepository<SolicitudAmistad, String> {
     Page<SolicitudAmistad> findAllByReceptorIdAndEstado(String receptorId,Pageable pageable, EstadoSolicitudAmistad estado);
     Page<SolicitudAmistad> findAllByEmisorIdAndEstado(String emisorId,Pageable pageable, EstadoSolicitudAmistad estado);
+    Boolean existsByEmisorIdAndReceptorIdAndEstado(String emisorId, String receptorId, EstadoSolicitudAmistad estado);
 }

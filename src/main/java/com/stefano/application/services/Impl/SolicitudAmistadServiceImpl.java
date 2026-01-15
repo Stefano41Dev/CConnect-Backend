@@ -33,72 +33,75 @@ public class SolicitudAmistadServiceImpl implements SolicitudAmistadService {
     @Override
     @Transactional
     public SolicitudAmistadDtoResponse mandarSolicitudAmistad(MandarSolicitudAmistadDtoRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SolicitudAmistad solicitudAmistad = solicitudMapper.mandarSolicitudToEntity(request);
-        if(authentication!=null && authentication.getPrincipal() instanceof Usuario usuarioActual){
-            solicitudAmistad.setEmisorId(usuarioActual.getId());
 
-        }else{
-            throw new ErrorNegocio("Usuario no autenticado", HttpStatus.BAD_REQUEST);
+        SolicitudAmistad solicitudAmistad = solicitudMapper.toEntity(request);
+        Usuario usuarioActual = getAuthentication();
+
+        if (Objects.equals(usuarioActual.getId(), solicitudAmistad.getReceptorId())) {
+            throw new ErrorNegocio("No puedes enviarte una solicitud a ti mismo", HttpStatus.BAD_REQUEST);
         }
+
+        boolean existeSolicitud = solicitudAmistadRepository
+                .existsByEmisorIdAndReceptorIdAndEstado(
+                        usuarioActual.getId(),
+                        solicitudAmistad.getReceptorId(),
+                        EstadoSolicitudAmistad.PENDIENTE
+                );
+
+        if (existeSolicitud) {
+            throw new ErrorNegocio("Ya existe una solicitud pendiente", HttpStatus.CONFLICT);
+        }
+        solicitudAmistad.setEmisorId(usuarioActual.getId());
         solicitudAmistad.setFechaEnvio(LocalDateTime.now());
         solicitudAmistad = solicitudAmistadRepository.save(solicitudAmistad);
+
         return solicitudMapper.toDto(solicitudAmistad);
     }
 
     @Override
     @Transactional
     public void aceptarSolicitudAmistad(CambiarEstadoSolicitudDtoRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Usuario usuarioActual = (Usuario) authentication.getPrincipal();
+
+        Usuario usuarioActual = getAuthentication();
 
         SolicitudAmistad solicitudAmistad = solicitudAmistadRepository.findById(request.idSolicitudAmistad())
                 .orElseThrow(() -> new ErrorNegocio("Solicitud de amistad no encontrada", HttpStatus.NOT_FOUND));
 
-
         if (!Objects.equals(usuarioActual.getId(), solicitudAmistad.getReceptorId())) {
             throw new ErrorNegocio("No tienes permiso para aceptar esta solicitud", HttpStatus.FORBIDDEN);
         }
-
-
         if (!EstadoSolicitudAmistad.PENDIENTE.equals(solicitudAmistad.getEstado())) {
             throw new ErrorNegocio("Solo se pueden aceptar solicitudes pendientes", HttpStatus.CONFLICT);
         }
-
+        if (usuarioActual.getAmigosIds().contains(solicitudAmistad.getEmisorId())) {
+            throw new ErrorNegocio("Ya son amigos", HttpStatus.CONFLICT);
+        }
 
         Usuario usuarioEmisor = usuarioRepository.findById(solicitudAmistad.getEmisorId())
                 .orElseThrow(() -> new ErrorNegocio("Usuario emisor no encontrado", HttpStatus.NOT_FOUND));
-
         Usuario usuarioReceptor = usuarioRepository.findById(solicitudAmistad.getReceptorId())
                 .orElseThrow(() -> new ErrorNegocio("Usuario receptor no encontrado", HttpStatus.NOT_FOUND));
-
 
         usuarioReceptor.getAmigosIds().add(usuarioEmisor.getId());
         usuarioEmisor.getAmigosIds().add(usuarioReceptor.getId());
 
-
         solicitudAmistad.setEstado(EstadoSolicitudAmistad.ACEPTADO);
-
-
         solicitudAmistadRepository.save(solicitudAmistad);
         usuarioRepository.save(usuarioReceptor);
         usuarioRepository.save(usuarioEmisor);
     }
 
-
     @Override
     @Transactional
     public void cancelarSolicitudAmistad(CambiarEstadoSolicitudDtoRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Usuario usuarioActual = (Usuario) authentication.getPrincipal();
+        Usuario usuarioActual = getAuthentication();
 
         SolicitudAmistad solicitudAmistad = solicitudAmistadRepository.findById(request.idSolicitudAmistad())
                 .orElseThrow(()-> new ErrorNegocio("La solicitud de amistad no encontrada", HttpStatus.NOT_FOUND));
 
-        if (!Objects.equals(usuarioActual.getId(), solicitudAmistad.getReceptorId())) {
-            throw new ErrorNegocio("No tienes permiso para aceptar esta solicitud", HttpStatus.FORBIDDEN);
+        if (!Objects.equals(usuarioActual.getId(), solicitudAmistad.getEmisorId())) {
+            throw new ErrorNegocio("No tienes permiso para cancelar esta solicitud", HttpStatus.FORBIDDEN);
         }
-
 
         if (!EstadoSolicitudAmistad.PENDIENTE.equals(solicitudAmistad.getEstado())) {
             throw new ErrorNegocio("Solo se pueden cancelar solicitudes pendientes", HttpStatus.CONFLICT);
@@ -110,27 +113,26 @@ public class SolicitudAmistadServiceImpl implements SolicitudAmistadService {
     @Override
     @Transactional
     public void rechazarSolicitudAmistad(CambiarEstadoSolicitudDtoRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Usuario usuarioActual = (Usuario) authentication.getPrincipal();
+        Usuario usuarioActual = getAuthentication();
 
         SolicitudAmistad solicitudAmistad = solicitudAmistadRepository.findById(request.idSolicitudAmistad())
                 .orElseThrow(()-> new ErrorNegocio("La solicitud de amistad no encontrada", HttpStatus.NOT_FOUND));
 
         if (!Objects.equals(usuarioActual.getId(), solicitudAmistad.getReceptorId())) {
-            throw new ErrorNegocio("No tienes permiso para aceptar esta solicitud", HttpStatus.FORBIDDEN);
+            throw new ErrorNegocio("No tienes permiso para rechazar esta solicitud", HttpStatus.FORBIDDEN);
         }
-
 
         if (!EstadoSolicitudAmistad.PENDIENTE.equals(solicitudAmistad.getEstado())) {
             throw new ErrorNegocio("Solo se pueden rechazar solicitudes pendientes", HttpStatus.CONFLICT);
         }
+
         solicitudAmistad.setEstado(EstadoSolicitudAmistad.RECHAZADO);
         solicitudAmistadRepository.save(solicitudAmistad);
-
     }
 
     @Override
     public Page<SolicitudAmistadDtoResponse> listaSolicitudesAmistadPendientesRecibidas(String userId, Pageable pageable, String estado) {
+        getAuthentication();
         EstadoSolicitudAmistad estadoEnum = convertirEstadoEnum(estado);
         Page<SolicitudAmistad> solicitudes = solicitudAmistadRepository.findAllByReceptorIdAndEstado(userId,pageable, estadoEnum);
         return solicitudes.map(solicitudMapper::toDto);
@@ -138,6 +140,7 @@ public class SolicitudAmistadServiceImpl implements SolicitudAmistadService {
 
     @Override
     public Page<SolicitudAmistadDtoResponse> listaSolicitudesAmistadPendientesEmitidas(String userId, Pageable pageable, String estado) {
+        getAuthentication();
         EstadoSolicitudAmistad estadoEnum = convertirEstadoEnum(estado);
         Page<SolicitudAmistad> solicitudes = solicitudAmistadRepository.findAllByEmisorIdAndEstado(userId,pageable,estadoEnum);
         return solicitudes.map(solicitudMapper::toDto);
@@ -151,5 +154,12 @@ public class SolicitudAmistadServiceImpl implements SolicitudAmistadService {
             throw new ErrorNegocio("El estado de solicitud no coincide", HttpStatus.CONFLICT);
         }
         return nuevoEstado;
+    }
+    private Usuario getAuthentication(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication == null || !(authentication.getPrincipal() instanceof Usuario usuario)){
+            throw new ErrorNegocio("Usuario no autenticado", HttpStatus.UNAUTHORIZED);
+        }
+        return usuario;
     }
 }

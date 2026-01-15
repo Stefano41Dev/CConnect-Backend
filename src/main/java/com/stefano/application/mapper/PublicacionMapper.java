@@ -6,12 +6,11 @@ import com.stefano.web.dto.publicacion.PublicacionDtoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class PublicacionMapper {
-    private final ComentarioMapper comentarioMapper;
+
     public Publicacion toEntity (PublicacionDtoRequest publicacionDtoRequest) {
         return Publicacion.builder()
                 .contenido(publicacionDtoRequest.contenido())
@@ -23,11 +22,8 @@ public class PublicacionMapper {
                 .usernameAutor(publicacion.getUsername())
                 .contenido(publicacion.getContenido())
                 .fechaPublicacion(publicacion.getFechaPublicacion())
+                .totalComentarios(publicacion.getTotalComentarios())
                 .imagenesUrl(publicacion.getImagenesUrl())
-                .comentarios(publicacion.getComentarios() == null ? List.of() :
-                        publicacion.getComentarios().stream()
-                                .map(comentarioMapper::toDto)
-                                .toList())
                 .build();
 
     }

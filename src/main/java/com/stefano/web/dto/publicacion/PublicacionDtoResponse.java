@@ -13,6 +13,6 @@ public class PublicacionDtoResponse {
         private String usernameAutor;
         private String contenido;
         private LocalDateTime fechaPublicacion;
+        private Long totalComentarios;
         private List<String> imagenesUrl;
-        private List<ComentarioDtoResponse> comentarios;
 }

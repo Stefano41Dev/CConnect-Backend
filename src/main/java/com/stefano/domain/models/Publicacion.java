@@ -20,8 +20,7 @@ public class Publicacion {
     private String username;
     private String contenido;
     private LocalDateTime fechaPublicacion;
-    @Builder.Default
-    private List<Comentario> comentarios = new ArrayList<>();
+    private Long totalComentarios;
     @Builder.Default
     private List<String> imagenesUrl = new ArrayList<>();
 }
