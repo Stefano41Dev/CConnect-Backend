@@ -10,7 +10,8 @@ Permite la gestión de usuarios, publicaciones, solicitudes de amistad y autenti
 -  Spring Security + JWT
 -  Lombok
 -  Maven
-
+-  Docker
+  
 ### Autenticación
 | Método | Endpoint | Descripción |
 |------|---------|------------|
