@@ -4,6 +4,17 @@ spring:
   data:
     mongodb:
       uri: ${MONGODBURI}
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${CORREO_JMAIL}
+    password: ${PASSWD_JMAIL}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 server:
   port: 8080
 cloudinary:
