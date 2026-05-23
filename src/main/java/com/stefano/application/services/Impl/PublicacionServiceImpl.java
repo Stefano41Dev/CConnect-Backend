@@ -4,7 +4,7 @@ import com.stefano.application.exception.ErrorNegocio;
 import com.stefano.application.mapper.PublicacionMapper;
 import com.stefano.application.services.CloudinaryService;
 import com.stefano.application.services.PublicacionService;
-import com.stefano.application.tools.TipoImagenes;
+import com.stefano.application.tools.TypeImg;
 import com.stefano.domain.models.Publicacion;
 import com.stefano.domain.models.Usuario;
 import com.stefano.domain.repository.PublicacionRepository;
@@ -31,7 +31,7 @@ public class PublicacionServiceImpl implements PublicacionService {
     private final PublicacionRepository publicacionRepository;
     private final UsuarioRepository usuarioRepository;
     private final CloudinaryService cloudinaryService;
-    private final TipoImagenes tipoImagenes;
+    private final TypeImg tipoImagenes;
 
     @Override
     public PublicacionDtoResponse crearPublicacion(PublicacionDtoRequest publicacionDtoRequest, List<MultipartFile> imagenes) {

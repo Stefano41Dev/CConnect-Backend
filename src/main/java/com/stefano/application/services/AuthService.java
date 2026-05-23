@@ -1,10 +1,9 @@
 package com.stefano.application.services;
 
-import com.stefano.web.dto.usuario.AuthRequest;
-import com.stefano.web.dto.usuario.AuthResponse;
-import com.stefano.web.dto.usuario.RegisterRequest;
+import com.stefano.web.dto.usuario.*;
 
 public interface AuthService {
-    AuthResponse register(RegisterRequest registerRequest);
+    MessageResponse register(RegisterRequest registerRequest);
     AuthResponse login(AuthRequest authRequest);
+    MessageResponse verify(VerifyRequest verifyRequest);
 }

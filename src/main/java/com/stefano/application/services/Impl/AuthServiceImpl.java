@@ -4,18 +4,15 @@ import com.stefano.application.exception.ErrorNegocio;
 import com.stefano.application.security.JwtService;
 import com.stefano.application.services.AuthService;
 import com.stefano.application.services.MailService;
+import com.stefano.application.tools.CodeUser;
 import com.stefano.domain.models.Usuario;
 import com.stefano.domain.repository.UsuarioRepository;
-import com.stefano.web.dto.usuario.AuthRequest;
-import com.stefano.web.dto.usuario.AuthResponse;
-import com.stefano.web.dto.usuario.RegisterRequest;
+import com.stefano.web.dto.usuario.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +22,9 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new  BCryptPasswordEncoder();
     private final MailService mailService;
+    private final CodeUser codeUser;
     @Override
-    public AuthResponse register(RegisterRequest request) {
+    public MessageResponse register(RegisterRequest request) {
 
         if (usuarioRepository.existsByUsername(request.getUsername())) {
             throw new ErrorNegocio("El nombre de usuario ya está en uso.",HttpStatus.CONFLICT);
@@ -41,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
         user.setFechaNacimiento(request.getFechaNacimiento());
         user.setPasswordHash(bCryptPasswordEncoder.encode(request.getPassword()));
 
-        String codeVerification = codeRandom();
+        String codeVerification = codeUser.codeRandom();
 
         user.setCodeVerification(codeVerification);
         user.setCodeExpirations(LocalDateTime.now().plusMinutes(10));
@@ -49,12 +47,11 @@ public class AuthServiceImpl implements AuthService {
         usuarioRepository.save(user);
 
         String link = "http://localhost:8080/auth/verify?email="
-                + user.getEmail() + "&codigo=" + codeVerification;
+                + user.getEmail() + "&code=" + codeVerification;
+
         mailService.enviarCorreo(request.getEmail(),"CCONECT - Verificacion de cuenta", "Dale Click al siguiente enlace para verificar la cuenta \b " + link);
 
-        //Todo: Necesitamos crear un endpoint para verificar y que este metodo devuelva un responde con success y message
-        String token = jwtService.generateToken(user.getUsername());
-        return new AuthResponse(token);
+        return new MessageResponse("Revise su correo para verificar la cuenta",true);
     }
 
     @Override
@@ -69,9 +66,23 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtService.generateToken(user.getUsername());
         return new AuthResponse(token);
     }
-    public String codeRandom() {
-        Random random = new Random();
-        int codigo = 100000 + random.nextInt(900000);
-        return String.valueOf(codigo);
+
+    @Override
+    public MessageResponse verify(VerifyRequest verifyRequest) {
+        Usuario user = usuarioRepository.findByEmail(verifyRequest.email())
+                .orElseThrow(()-> new ErrorNegocio("Usuario no encontrado", HttpStatus.NOT_FOUND));
+
+        if(user.getCodeExpirations().isBefore(LocalDateTime.now())){
+            throw new ErrorNegocio("Codigo experido", HttpStatus.CONFLICT);
+        }
+        if(!user.getCodeVerification().equals(verifyRequest.codeVerification())){
+            throw new ErrorNegocio("Codigo incorrecto", HttpStatus.CONFLICT);
+        }
+        user.setActive(true);
+        user.setCodeVerification(null);
+        usuarioRepository.save(user);
+        return new MessageResponse("Su cuenta a sido verificada",true);
     }
+
+
 }

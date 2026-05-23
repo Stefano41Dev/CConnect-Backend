@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 @Component
-public class TipoImagenes {
+public class TypeImg {
     private final List<String> IMAGE_TYPES = List.of(
             "image/jpeg",
             "image/png",

@@ -1,14 +1,10 @@
 package com.stefano.web.controller;
 
 import com.stefano.application.services.AuthService;
-import com.stefano.web.dto.usuario.AuthRequest;
-import com.stefano.web.dto.usuario.AuthResponse;
-import com.stefano.web.dto.usuario.RegisterRequest;
+import com.stefano.web.dto.usuario.*;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -17,12 +13,20 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public AuthResponse register(@RequestBody RegisterRequest request) {
+    public MessageResponse register(@RequestBody RegisterRequest request) {
         return authService.register(request);
     }
 
     @PostMapping("/login")
     public AuthResponse login(@RequestBody AuthRequest request) {
         return authService.login(request);
+    }
+
+    @GetMapping("/verify")
+    public MessageResponse verify(
+            @PathParam("email") String email,
+            @PathParam("code") String code
+    ){
+        return authService.verify(new VerifyRequest(email,code));
     }
 }
