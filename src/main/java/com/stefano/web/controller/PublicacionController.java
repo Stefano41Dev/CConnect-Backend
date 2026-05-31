@@ -1,6 +1,8 @@
 package com.stefano.web.controller;
 
+import com.stefano.application.services.ComentarioService;
 import com.stefano.application.services.PublicacionService;
+import com.stefano.web.dto.comentario.ComentarioDtoResponse;
 import com.stefano.web.dto.publicacion.PublicacionDtoRequest;
 import com.stefano.web.dto.publicacion.PublicacionDtoResponse;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,7 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PublicacionController {
     private final PublicacionService publicacionService;
-
+    private final ComentarioService comentarioService;
     @PostMapping(
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
@@ -75,4 +77,12 @@ public class PublicacionController {
         return ResponseEntity.ok().body(publicacionService.buscarPublicacion(idPublicacion));
     }
 
+    @GetMapping("/{idPublicacion}/comments")
+    public ResponseEntity<Page<ComentarioDtoResponse>> listarComentariosPublicacionId(
+            @PathVariable String idPublicacion,
+            @ParameterObject
+            @PageableDefault(page = 0, size = 10, sort = "fechaPublicacion") Pageable pageable
+    ){
+        return ResponseEntity.ok().body(comentarioService.listarComentariosPublicacion(idPublicacion, pageable));
+    }
 }

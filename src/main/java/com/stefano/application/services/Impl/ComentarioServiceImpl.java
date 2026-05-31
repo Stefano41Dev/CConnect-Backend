@@ -11,6 +11,8 @@ import com.stefano.domain.repository.PublicacionRepository;
 import com.stefano.web.dto.comentario.ComentarioDtoRequest;
 import com.stefano.web.dto.comentario.ComentarioDtoResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,5 +45,11 @@ public class ComentarioServiceImpl implements ComentarioService {
         publicacion.setTotalComentarios(publicacion.getTotalComentarios() + 1); //ToDo: Parece que el puede fallar si dos usuarios lo usan al mismo tiempo CORREGIR
         publicacionRepository.save(publicacion);
         return comentarioMapper.toDto(comentarioGuardado);
+    }
+
+    @Override
+    public Page<ComentarioDtoResponse> listarComentariosPublicacion(String idPublicacion, Pageable pageable){
+        var comentarios = comentarioRepository.findAllByPublicacionId(idPublicacion, pageable);
+        return comentarios.map(comentarioMapper::toDto);
     }
 }
