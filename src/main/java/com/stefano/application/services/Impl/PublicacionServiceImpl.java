@@ -77,4 +77,10 @@ public class PublicacionServiceImpl implements PublicacionService {
         return  publicaciones.map(publicacionMapper::toDto);
     }
 
+    @Override
+    public PublicacionDtoResponse buscarPublicacion(String idPublicacion) {
+        Publicacion publicacion = publicacionRepository.findById(idPublicacion).orElseThrow(()-> new ErrorNegocio("La publicacion no existe", HttpStatus.NOT_FOUND));
+        return publicacionMapper.toDto(publicacion);
+    }
+
 }

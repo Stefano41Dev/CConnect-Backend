@@ -13,5 +13,5 @@ public interface PublicacionService {
     PublicacionDtoResponse crearPublicacion(PublicacionDtoRequest publicacionDtoRequest, List<MultipartFile> imagenes);
     Page<PublicacionDtoResponse> listarPublicacionesUser(String username, Pageable pageable);
     Page<PublicacionDtoResponse> listarPublicaciones(Pageable pageable);
-
+    PublicacionDtoResponse buscarPublicacion(String idPublicacion);
 }

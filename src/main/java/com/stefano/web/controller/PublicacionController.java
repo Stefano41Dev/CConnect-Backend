@@ -26,7 +26,6 @@ public class PublicacionController {
     private final PublicacionService publicacionService;
 
     @PostMapping(
-            value = "/generar-publicacion",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<PublicacionDtoResponse> crearPublicacion(
@@ -50,7 +49,7 @@ public class PublicacionController {
     }
 
 
-    @GetMapping(value = "/listar-publicaciones")
+    @GetMapping
     public ResponseEntity<Page<PublicacionDtoResponse>> listarPublicaciones(
             @ParameterObject
             @PageableDefault(page = 0, size = 10, sort = "fechaPublicacion") Pageable pageable
@@ -58,7 +57,8 @@ public class PublicacionController {
         Page<PublicacionDtoResponse> publicaciones = publicacionService.listarPublicaciones(pageable);
         return ResponseEntity.ok().body(publicaciones);
     }
-    @GetMapping(value = "/listar-publicaciones/{username}")
+
+    @GetMapping(value = "/user/{username}")
     public ResponseEntity<Page<PublicacionDtoResponse>> listarPublicacionesUsuario(
             @PathVariable String username,
             @ParameterObject
@@ -67,4 +67,12 @@ public class PublicacionController {
         Page<PublicacionDtoResponse> publicaciones = publicacionService.listarPublicacionesUser(username, pageable);
         return ResponseEntity.ok().body(publicaciones);
     }
+
+    @GetMapping("/{idPublicacion}")
+    public ResponseEntity<PublicacionDtoResponse> buscarPublicacion(
+            @PathVariable String idPublicacion
+    ){
+        return ResponseEntity.ok().body(publicacionService.buscarPublicacion(idPublicacion));
+    }
+
 }

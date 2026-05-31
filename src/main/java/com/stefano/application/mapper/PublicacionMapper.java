@@ -18,6 +18,7 @@ public class PublicacionMapper {
     }
     public PublicacionDtoResponse toDto (Publicacion publicacion) {
         return PublicacionDtoResponse.builder()
+                .id(publicacion.getId())
                 .userid(publicacion.getUserid())
                 .usernameAutor(publicacion.getUsername())
                 .contenido(publicacion.getContenido())
