@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 public class ComentarioMapper {
     public ComentarioDtoResponse toDto(Comentario comentario) {
         return ComentarioDtoResponse.builder()
+                .id(comentario.getId())
                 .username(comentario.getUsername())
                 .contenido(comentario.getContenido())
                 .fechaPublicacion(comentario.getFechaPublicacion())
