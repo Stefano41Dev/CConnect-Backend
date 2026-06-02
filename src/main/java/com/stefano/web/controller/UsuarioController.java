@@ -4,7 +4,10 @@ import com.stefano.application.services.UsuarioService;
 import com.stefano.web.dto.usuario.UsuarioPerfilDtoResponse;
 import com.stefano.web.dto.usuario.UsuarioDtoResponse;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +37,15 @@ public class UsuarioController {
             @PathVariable String idUsuario
     ){
         return ResponseEntity.ok().body(usuarioService.listarAmigosUsuarioPorId(idUsuario));
+    }
 
+    @GetMapping("/search/{nombre}")
+    public ResponseEntity<Page<UsuarioPerfilDtoResponse>> buscarUsuariosPorNombre(
+         @PathVariable String nombre,
+         @ParameterObject
+         @PageableDefault(page = 0, size = 10, sort = "fechaPublicacion") Pageable pageable
+    ){
+
+        return ResponseEntity.ok().body(usuarioService.buscarUsuariosPorNombre(nombre,pageable ));
     }
 }

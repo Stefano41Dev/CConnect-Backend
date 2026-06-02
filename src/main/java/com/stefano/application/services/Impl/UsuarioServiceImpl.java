@@ -11,6 +11,7 @@ import com.stefano.web.dto.usuario.UsuarioDtoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +31,14 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UsuarioDtoResponse buscarUsuarioPorId(String id) {
         Usuario usuario = userRepository.findById(id).orElseThrow(()-> new ErrorNegocio("No se encontro el usuario id: " + id, HttpStatus.NOT_FOUND));
         return userMapper.toDto(usuario);
+    }
+
+    @Override
+    public Page<UsuarioPerfilDtoResponse> buscarUsuariosPorNombre(String nombre, Pageable pageable) {
+        Page<Usuario> usuario = userRepository.findByUsernameContainingIgnoreCase(nombre,pageable);
+        return usuario.map(user ->
+            new UsuarioPerfilDtoResponse(user.getId(),user.getUsername())
+        );
     }
 
     @Override
