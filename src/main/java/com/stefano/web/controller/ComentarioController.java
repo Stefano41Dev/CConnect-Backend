@@ -15,7 +15,7 @@ public class ComentarioController {
 
     private final ComentarioServiceImpl comentarioService;
 
-    @PostMapping("/agregar")
+    @PostMapping
     public ResponseEntity<ComentarioDtoResponse> agregarComentario(
             @RequestBody ComentarioDtoRequest comentarioDtoRequest
     ){
