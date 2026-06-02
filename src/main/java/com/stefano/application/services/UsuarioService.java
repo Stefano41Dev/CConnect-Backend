@@ -1,6 +1,8 @@
 package com.stefano.application.services;
 
 
-public interface UsuarioService {
+import com.stefano.web.dto.usuario.UsuarioDtoResponse;
 
+public interface UsuarioService {
+    UsuarioDtoResponse buscarUsuarioPorId(String id);
 }

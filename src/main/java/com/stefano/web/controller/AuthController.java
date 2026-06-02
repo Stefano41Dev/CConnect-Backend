@@ -1,7 +1,7 @@
 package com.stefano.web.controller;
 
 import com.stefano.application.services.AuthService;
-import com.stefano.web.dto.usuario.*;
+import com.stefano.web.dto.auth.*;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

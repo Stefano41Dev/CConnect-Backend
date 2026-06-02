@@ -7,7 +7,7 @@ import com.stefano.application.services.MailService;
 import com.stefano.application.tools.CodeUser;
 import com.stefano.domain.models.Usuario;
 import com.stefano.domain.repository.UsuarioRepository;
-import com.stefano.web.dto.usuario.*;
+import com.stefano.web.dto.auth.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

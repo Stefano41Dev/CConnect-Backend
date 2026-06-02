@@ -1,4 +1,4 @@
-package com.stefano.web.dto.usuario;
+package com.stefano.web.dto.auth;
 
 public record VerifyRequest(
     String email,
