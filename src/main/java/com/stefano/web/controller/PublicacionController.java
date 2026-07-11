@@ -60,13 +60,13 @@ public class PublicacionController {
         return ResponseEntity.ok().body(publicaciones);
     }
 
-    @GetMapping(value = "/user/{username}")
+    @GetMapping(value = "/user/{id}")
     public ResponseEntity<Page<PublicacionDtoResponse>> listarPublicacionesUsuario(
-            @PathVariable String username,
+            @PathVariable String id,
             @ParameterObject
             @PageableDefault(page = 0, size = 10, sort = "fechaPublicacion") Pageable pageable
     ){
-        Page<PublicacionDtoResponse> publicaciones = publicacionService.listarPublicacionesUser(username, pageable);
+        Page<PublicacionDtoResponse> publicaciones = publicacionService.listarPublicacionesId(id, pageable);
         return ResponseEntity.ok().body(publicaciones);
     }
 

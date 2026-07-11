@@ -72,6 +72,12 @@ public class PublicacionServiceImpl implements PublicacionService {
     }
 
     @Override
+    public Page<PublicacionDtoResponse> listarPublicacionesId(String id, Pageable pageable) {
+        Page<Publicacion> publicaciones = publicacionRepository.findAllByUserid(id, pageable);
+        return publicaciones.map(publicacionMapper::toDto);
+    }
+
+    @Override
     public Page<PublicacionDtoResponse> listarPublicaciones(Pageable pageable) {
         Page<Publicacion> publicaciones = publicacionRepository.findAll(pageable);
         return  publicaciones.map(publicacionMapper::toDto);

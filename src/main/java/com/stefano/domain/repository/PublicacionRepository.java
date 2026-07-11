@@ -9,4 +9,6 @@ public interface PublicacionRepository extends MongoRepository<Publicacion, Stri
 
     Page<Publicacion> findAll(Pageable pageable);
     Page<Publicacion> findAllByUsername(String username, Pageable pageable);
+
+    Page<Publicacion> findAllByUserid(String userid, Pageable pageable);
 }

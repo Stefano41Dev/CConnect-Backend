@@ -12,6 +12,7 @@ import java.util.List;
 public interface PublicacionService {
     PublicacionDtoResponse crearPublicacion(PublicacionDtoRequest publicacionDtoRequest, List<MultipartFile> imagenes);
     Page<PublicacionDtoResponse> listarPublicacionesUser(String username, Pageable pageable);
+    Page<PublicacionDtoResponse> listarPublicacionesId(String id, Pageable pageable);
     Page<PublicacionDtoResponse> listarPublicaciones(Pageable pageable);
     PublicacionDtoResponse buscarPublicacion(String idPublicacion);
 }
