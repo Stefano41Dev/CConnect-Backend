@@ -124,4 +124,8 @@ La API estará disponible en:
 ```
 http://localhost:8080/swagger-ui/index.html
 ```
+Remoto:
+```
+https://cconnect-backend-kf6u.onrender.com/swagger-ui/index.html
+```
 
