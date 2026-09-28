@@ -12,9 +12,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
 import java.time.LocalDateTime;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
@@ -23,8 +27,15 @@ public class AuthServiceImpl implements AuthService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new  BCryptPasswordEncoder();
     private final MailService mailService;
     private final CodeUser codeUser;
+
     @Override
+    @Transactional
     public MessageResponse register(RegisterRequest request) {
+
+        System.out.println(
+                "Transacción activa: " +
+                        TransactionSynchronizationManager.isActualTransactionActive()
+        );
 
         if (usuarioRepository.existsByUsername(request.getUsername())) {
             throw new ErrorNegocio("El nombre de usuario ya está en uso.",HttpStatus.CONFLICT);
@@ -68,6 +79,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public MessageResponse verify(VerifyRequest verifyRequest) {
         Usuario user = usuarioRepository.findByEmail(verifyRequest.email())
                 .orElseThrow(()-> new ErrorNegocio("Usuario no encontrado", HttpStatus.NOT_FOUND));

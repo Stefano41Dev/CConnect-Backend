@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ public class PublicacionServiceImpl implements PublicacionService {
     private final TypeImg tipoImagenes;
 
     @Override
+    @Transactional
     public PublicacionDtoResponse crearPublicacion(PublicacionDtoRequest publicacionDtoRequest, List<MultipartFile> imagenes) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

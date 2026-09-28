@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -29,6 +30,7 @@ public class ComentarioServiceImpl implements ComentarioService {
     private final PublicacionRepository publicacionRepository;
 
     @Override
+    @Transactional
     public ComentarioDtoResponse agregarComentario(ComentarioDtoRequest comentarioDtoRequest) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
